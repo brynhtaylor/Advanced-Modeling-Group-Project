@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Optimization Comparison</title>
+    <style>
+        .container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            padding: 20px;
+        }
+        .form-container {
+            width: 30%;
+        }
+        .plot-container {
+            width: 35%;
+            text-align: center;
+        }
+        .plot-container img {
+            width: 100%;
+            max-height: 500px;
+            object-fit: contain;
+            margin-top: 10px;
+        }
+        .plot-heading {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .portfolio-info {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            font-family: Arial, sans-serif;
+            text-align: left;
+        }
+        .portfolio-info h3 {
+            margin-top: 0;
+        }
+        .portfolio-info p {
+            margin: 5px 0;
+        }
+    </style>
+    <script>
+        async function generateCombinedPlot(event) {
+        event.preventDefault();
+
+        const formData = new FormData(document.getElementById('comparisonForm'));
+
+        try {
+            const response = await fetch('/generate_combined', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Failed to generate data");
+            }
+
+            // Update the Classical plot image
+            const classicalImgUrl = data.classical_plot;
+            document.getElementById('classicalPlot').src = classicalImgUrl;
+
+            // Update the Random Forest plot image
+            const rfImgUrl = data.rf_plot;
+            document.getElementById('rfPlot').src = rfImgUrl;
+
+            displayPortfolioData(data.portfolio_data);
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert(`An error occurred while generating the plot and portfolio data: ${error.message}`);
+        }
+    }
+
+    function displayPortfolioData(portfolioData) {
+        const classical = portfolioData.classical_max_sharpe;
+        const classicalMin = portfolioData.classical_min_variance;
+        const rf = portfolioData.rf_max_sharpe;
+        const rfMin = portfolioData.rf_min_variance;
+
+        document.getElementById('classicalPortfolioData').innerHTML = `
+            <h3>Classical Max Sharpe Ratio Portfolio</h3>
+            <p><strong>Weights:</strong> ${classical.weights.map(w => w.toFixed(2)).join(', ')}</p>
+            <p><strong>Return:</strong> ${classical.return.toFixed(2)}</p>
+            <p><strong>Volatility:</strong> ${classical.volatility.toFixed(2)}</p>
+            <p><strong>Sharpe Ratio:</strong> ${classical.sharpe_ratio.toFixed(2)}</p>
+
+            <h3>Classical Min Variance Portfolio</h3>
+            <p><strong>Weights:</strong> ${classicalMin.weights.map(w => w.toFixed(2)).join(', ')}</p>
+            <p><strong>Return:</strong> ${classicalMin.return.toFixed(2)}</p>
+            <p><strong>Volatility:</strong> ${classicalMin.volatility.toFixed(2)}</p>
+        `;
+
+        document.getElementById('rfPortfolioData').innerHTML = `
+            <h3>Random Forest Max Sharpe Ratio Portfolio</h3>
+            <p><strong>Weights:</strong> ${rf.weights.map(w => w.toFixed(2)).join(', ')}</p>
+            <p><strong>Return:</strong> ${rf.return.toFixed(2)}</p>
+            <p><strong>Volatility:</strong> ${rf.volatility.toFixed(2)}</p>
+            <p><strong>Sharpe Ratio:</strong> ${rf.sharpe_ratio.toFixed(2)}</p>
+
+            <h3>Random Forest Min Variance Portfolio</h3>
+            <p><strong>Weights:</strong> ${rfMin.weights.map(w => w.toFixed(2)).join(', ')}</p>
+            <p><strong>Return:</strong> ${rfMin.return.toFixed(2)}</p>
+            <p><strong>Volatility:</strong> ${rfMin.volatility.toFixed(2)}</p>
+        `;
+    }
+    </script>
+</head>
+<body>
+    <h1>Portfolio Optimization Comparison</h1>
+    <div class="container">
+        <div class="form-container">
+            <form id="comparisonForm" onsubmit="generateCombinedPlot(event)">
+                <label for="tickers">Enter stock tickers (comma-separated, e.g., AAPL, MSFT, GOOGL):</label><br>
+                <input type="text" id="tickers" name="tickers" required><br><br>
+                
+                <label for="start_date">Start Date (YYYY-MM-DD):</label><br>
+                <input type="date" id="start_date" name="start_date" required><br><br>
+                
+                <label for="end_date">End Date (YYYY-MM-DD):</label><br>
+                <input type="date" id="end_date" name="end_date" required><br><br>
+                
+                <button type="submit">Generate Combined Frontier</button>
+            </form>
+        </div>
+
+        <div class="plot-container">
+            <div class="plot-heading">Classical Efficient Frontier</div>
+            <img id="classicalPlot" src="" alt="Classical Efficient Frontier Plot">
+            <div id="classicalPortfolioData" class="portfolio-info"></div>
+        </div>
+
+        <div class="plot-container">
+            <div class="plot-heading">Random Forest Efficient Frontier</div>
+            <img id="rfPlot" src="" alt="Random Forest Efficient Frontier Plot">
+            <div id="rfPortfolioData" class="portfolio-info"></div>
+        </div>
+    </div>
+</body>
+</html>

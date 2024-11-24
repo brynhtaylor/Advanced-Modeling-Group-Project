@@ -1,0 +1,15 @@
+Flask==2.1.1
+pandas==2.2.3
+numpy==1.26.2
+matplotlib==3.9.2
+scipy==1.12.0
+scikit-learn==1.5.2
+yfinance==0.2.31
+joblib==1.4.2
+Werkzeug==2.0.3
+Jinja2==3.1.4
+seaborn==0.13.2
+SQLAlchemy==2.0.35
+statsmodels==0.14.4
+requests==2.31.0
+wrds==3.2.0
