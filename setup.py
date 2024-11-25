@@ -3,7 +3,12 @@ import subprocess
 import webbrowser
 import time
 import sys
-import pkg_resources
+
+try:
+    import pkg_resources
+except ImportError:
+    print("Setuptools is missing. Installing setuptools...")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "setuptools"])
 
 print("Running setup script...")
 
