@@ -3,9 +3,21 @@ import subprocess
 import webbrowser
 import time
 import sys
+
+# Try to import pkg_resources, which comes with setuptools
+try:
+    import pkg_resources
+except ImportError:
+    # If pkg_resources is not available, try installing setuptools
+    print("Setuptools is missing. Installing setuptools...")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "setuptools"])
+    # Try importing pkg_resources again
+    import pkg_resources
+
 import pkg_resources
 
 print("Running setup script...")
+# Rest of the setup script...
 
 # Get the current directory of the script
 current_directory = os.path.dirname(os.path.abspath(__file__))
